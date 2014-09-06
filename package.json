@@ -1,0 +1,10 @@
+﻿{
+  "name": "map-img",
+	"version": "0.0.1",
+	"description": "A map renderer for Garmin .img files",
+	"author": "Matt Cosand <matt@cosand.net>",
+	"main": "main.js",
+	"dependencies": {
+		"async": "*"
+	}
+}

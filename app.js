@@ -16,8 +16,8 @@ function loadTree(searchRoot) {
     function learnFile(imgFile, callback) {
       builder(imgFile)
       .then(function (imgInfo) {
-        console.log('push ' + imgFile);
-        console.log(imgInfo.title);
+        //console.log('push ' + imgFile);
+        //console.log(imgInfo.title);
         lookup.push(imgInfo);
       })
       .finally(function () {
@@ -26,19 +26,19 @@ function loadTree(searchRoot) {
     }
 
     function finishUp() {
-      console.log('loaded');
+      //console.log('loaded');
       resolve(lookup);
     }
 
     var imgFiles = fs.readdirSync(searchRoot)
       .filter(function (file) { return file.substr(-4).toLowerCase() === '.img'; })
       .map(function (item) { return path.join(searchRoot, item); });
-    console.log(imgFiles.length + ' files to process');
+    //console.log(imgFiles.length + ' files to process');
     var queue = async.queue(learnFile, 3);
     queue.drain = finishUp;
     queue.push(imgFiles);
 
-    console.log('running');
+    //console.log('running');
   });
 }
 
@@ -51,14 +51,12 @@ function getShapes(resultSet) {
 
     function processFile(filePath, callback) {
       fs.openAsync(filePath, 'r').then(function (fd) {
-        console.log(resultSet[filePath].imgInfo.title);
         Array.prototype.push.apply(collection.features, RgnFile.getShapes(
           resultSet[filePath].divisions,
           resultSet[filePath].imgInfo.rgnFAT,
           resultSet[filePath].imgInfo.lblFile,
           fd
           ));
-        console.log('in file');
       })
       .finally(function () { callback() });
     }
@@ -79,15 +77,14 @@ loadTree(config.dataPath).then(function (lookup) {
   var count = 0;
   for (var i in divisions) {
     count += divisions[i].divisions.length;
-    console.log(i);
   }
-  console.log(count + ' divisions across ' + Object.keys(divisions).length + ' files');
+  //console.log(count + ' divisions across ' + Object.keys(divisions).length + ' files');
   // debug count - end
 
   //var testDiv = divisions['c:\\code\\garmin\\topo\\10216001.img'].divisions[0];
   //console.log('div # ' + testDiv.debugN)
 
   getShapes(divisions).then(function (shapes) {
-    console.log(JSON.stringify(shapes));
+    console.log(JSON.stringify(shapes, null, null));
   });
 });

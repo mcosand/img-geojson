@@ -5,6 +5,13 @@
 	"author": "Matt Cosand <matt@cosand.net>",
 	"main": "main.js",
 	"dependencies": {
-		"async": "*"
+	  "mapnik": "*",
+		"carto": "*",
+		"millstone": "*",
+		"async": "*",
+		"bluebird": "*"
+	},
+	"devDependencies": {
+	  "mocha": "*"
 	}
 }

@@ -1,0 +1,76 @@
+<html>
+<head>
+  <title>Hey</title>
+  <link rel="stylesheet" href="/leaflet.css" />
+  <style type="text/css">
+    #map {
+      width: 100%;
+      height: 600px;
+    }
+    .leaflet-control-layers-toggle {
+      background-image: url(/img/layers.png);
+    }
+  </style>
+</head>
+<body>
+  Amazing!
+  <div id="map"></div>
+  <script src="/js/leaflet.js"></script>
+  <script src="/js/TileLayer.GeoJSON.js"></script>
+  <script type="text/javascript">
+    // create a map in the "map" div, set the view to a given place and zoom
+    var map = L.map('map').setView([
+      47.7289324467281,
+      -122.2573399543762
+    ],
+    15
+    );
+
+    // add an OpenStreetMap tile layer
+/*    .addTo(map);
+    */
+
+    var baseLayers = {
+      "OSM": L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
+      }).addTo(map)
+    };
+
+    var geoJsonUrl = '/nwtopo/contours/{z}/{x}/{y}.json';
+    var geoTileLayer = new L.TileLayer.GeoJSON(geoJsonUrl, {
+      clipTiles: true,
+    },
+      {
+        style: {
+          color: '#00D',
+          fillColor: '#00D',
+          weight: 1.0,
+          opacity: 0.8,
+          fillOpacity: 0.1
+        }
+      }).addTo(map);
+
+    var trailsLayer = new L.TileLayer.GeoJSON('/nwtopo/trails/{z}/{x}/{y}.json', {
+      clipTiles: true,
+    },
+  {
+    style: {
+      color: '#D00',
+      fillColor: '#D00',
+      weight: 3.0,
+      opacity: 0.8,
+      fillOpacity: 0.1
+    }
+  }).addTo(map);
+
+
+
+    var overlays = {
+      "Trails": trails,
+      "Contours (ft)": geoTileLayer
+    }
+
+    L.control.layers(baseLayers, overlays).addTo(map);
+  </script>
+</body>
+</html>

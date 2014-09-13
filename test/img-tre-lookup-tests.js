@@ -30,6 +30,6 @@ describe('IMG Tree lookup', function () {
 
   it('foo', function () {
     var divisions = lookup.divisionsInBounds({ north: 47, west: -122, south: 45, east: -121 }, 1);
-    assert.equal(15, countDivisions(divisions));
+    assert.equal(16, countDivisions(divisions));
   });
 });

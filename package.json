@@ -1,17 +1,14 @@
 ﻿{
-  "name": "map-img",
-  "version": "0.0.1",
+  "name": "img-geojson",
+  "version": "0.0.2",
   "description": "A map renderer for Garmin .img files",
   "author": "Matt Cosand <matt@cosand.net>",
-  "main": "main.js",
+  "main": "server.js",
   "dependencies": {
-    "mapnik": "*",
-    "carto": "*",
-    "millstone": "*",
     "express": "4.9.0",
     "compression": "1.1.0",
-    "async": "*",
-    "bluebird": "*"
+    "async": "0.9.0",
+    "bluebird": "2.3.2"
   },
   "devDependencies": {
     "mocha": "*"

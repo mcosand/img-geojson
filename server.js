@@ -14,20 +14,20 @@ Promise.promisifyAll(fs);
 
 var express = require('express')
 var app = express();
-//app.use(compression());
+app.use(compression());
 
 var lookup;
+app.use('/nwtopo', express.static(__dirname + '/www'));
 
 app.get('/nwtopo/trails/:zoom/:col/:row.json', function (req, res, next) {
   getTile('trails', [0x16], true, req, res, next);
 });
 
 app.get('/nwtopo/contours/:zoom/:col/:row.json', function (req, res, next) {
-  getTile('contours', [0x20, 0x21, 0x22], false, req, res, next);
+  getTile('contours', [0x20, 0x21, 0x22], true, req, res, next);
 });
 
 
-app.use(express.static(__dirname + '/www'));
 
 var server = null;
 
@@ -105,7 +105,6 @@ function getTile(layerName, polyTypes, doSave, req, res, next) {
   var reqZ = req.params.zoom * 1;
 
   var bounds = tileCalc.xyz2bounds(reqX, reqY, reqZ);
-
   if (!intersects(bounds, lookup.getBounds())) {
     res.status(404).send('out of bounds');
     console.log(req.originalUrl + ' out of bounds');
@@ -121,8 +120,12 @@ function getTile(layerName, polyTypes, doSave, req, res, next) {
 
   var file = folder + '/' + reqY + '.json'
   if (fs.existsSync(file) && fs.statSync(file).ctime > lookup.getLastModified()) {
-    console.log('found cached tile for ' + req.originalUrl);
-    res.send(fs.readFileSync(file));
+    //    console.log('found cached tile for ' + req.originalUrl);
+    fs.readFile(file, function (err, data) {
+      if (err) throw err;
+      res.contentType('application/json');
+      res.send(data);
+    });
     return;
   }
 
@@ -135,6 +138,7 @@ function getTile(layerName, polyTypes, doSave, req, res, next) {
       console.log('saving ' + req.originalUrl + ' as ' + file);
       fs.writeFileSync(file, result);
     }
+    res.contentType('application/json');
     res.send(result);
   });
 };

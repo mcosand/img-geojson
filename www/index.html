@@ -16,6 +16,9 @@
   <div id="map"></div>
   <script src="/nwtopo/js/leaflet.js"></script>
   <script src="/nwtopo/js/TileLayer.GeoJSON.js"></script>
+  <script src="http://maps.google.com/maps/api/js?v=3.2&sensor=false"></script>
+  <script src="/nwtopo/js/leaflet.google.js"></script>
+
   <script type="text/javascript">
     // create a map in the "map" div, set the view to a given place and zoom
     var map = L.map('map').setView([47.728932, -122.257339], 15);
@@ -26,17 +29,23 @@
       }).addTo(map)
     };
 
+    if (typeof google !== undefined) {
+      baseLayers["Google Satellite"] = new L.Google('HYBRID');
+      baseLayers["Google Streets"] = new L.Google('ROADMAP');
+    }
+
     var geoJsonUrl = '/nwtopo/contours/{z}/{x}/{y}.json';
     var geoTileLayer = new L.TileLayer.GeoJSON(geoJsonUrl, {
       clipTiles: true,
     },
       {
-        style: {
-          color: '#00D',
-          fillColor: '#00D',
-          weight: 1.0,
-          opacity: 0.8,
-          fillOpacity: 0.1
+        style: function(f) {
+          return {
+            color: '#AF591C',
+            weight: (f.properties.type == 0x22) ? 2 : 1,
+            opacity: 0.7,
+            clickable: false
+          };
         }
       }).addTo(map);
 
@@ -44,12 +53,28 @@
       clipTiles: true,
     },
     {
-      style: {
-        color: '#D00',
-        fillColor: '#D00',
-        weight: 3.0,
-        opacity: 0.8,
-        fillOpacity: 0.1
+      style: function(f) {
+        return (f.properties.type == 0x16) ? {
+          color: '#D00',
+          weight: 2.4,
+          opacity: 0.8
+        } : {
+          color: '#222',
+          weight: 1.5,
+          opacity: 0.7,
+          dashArray: '5, 5'
+        };
+      },
+      onEachFeature: function (feature, layer) {
+        if (feature.properties && feature.properties.name) {
+          var popupString = '<div class="popup">' + String(feature.properties.name)
+            .replace(/&/g, '&amp;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;') + '</div>';
+          layer.bindPopup(popupString);
+        }
       }
     }).addTo(map);
 

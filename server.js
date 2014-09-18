@@ -20,11 +20,11 @@ var lookup;
 app.use('/nwtopo', express.static(__dirname + '/www'));
 
 app.get('/nwtopo/trails/:zoom/:col/:row.json', function (req, res, next) {
-  getTile('trails', [0x16], true, req, res, next);
+  getTile('trails', ['l19','l22'], true, req, res, next);
 });
 
 app.get('/nwtopo/contours/:zoom/:col/:row.json', function (req, res, next) {
-  getTile('contours', [0x20, 0x21, 0x22], true, req, res, next);
+  getTile('contours', ['l32','l33','l34'], true, req, res, next);
 });
 
 
@@ -99,10 +99,17 @@ loadTree(config.dataPath).then(function (lookup) {
 });
 
 function getTile(layerName, polyTypes, doSave, req, res, next) {
-  var zoom = 4;
   var reqX = req.params.col * 1;
   var reqY = req.params.row * 1;
   var reqZ = req.params.zoom * 1;
+
+  if (reqZ > 18 || reqZ < 11) {
+    res.status(404).send('out of bounds. Use zoom levels 11-18');
+    return;
+  }
+
+  var zoom = reqZ < 14 ? req < 12 ? 2 : 3 : 4;
+//  console.log(zoom);
 
   var bounds = tileCalc.xyz2bounds(reqX, reqY, reqZ);
   if (!intersects(bounds, lookup.getBounds())) {

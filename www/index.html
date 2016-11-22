@@ -78,8 +78,11 @@
       }
     }).addTo(map);
 
+    var overlayLayer = L.tileLayer('/nwtopo/trails/{z}/{x}/{y}.png').addTo(map);
+
     var overlays = {
       "Trails": trailsLayer,
+      "Trails Img": overlayLayer,
       "Contours (ft)": geoTileLayer
     }
 

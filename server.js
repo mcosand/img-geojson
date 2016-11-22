@@ -9,6 +9,10 @@
   , compression = require('compression')
   , tileCalc = require('./lib/tile-calc.js')
   , intersects = require('./lib/intersects.js')
+  , mapnik = require('mapnik')
+  , mercator = require('./sphericalmercator.js')
+
+if (mapnik.register_default_input_plugins) mapnik.register_default_input_plugins();
 
 Promise.promisifyAll(fs);
 
@@ -27,9 +31,14 @@ app.get('/nwtopo/contours/:zoom/:col/:row.json', function (req, res, next) {
   getTile('contours', ['l32','l33','l34'], true, req, res, next);
 });
 
-
+app.get('/nwtopo/trails/:zoom/:col/:row.png', function(req, res, next) {
+  getTile('trails', ['l19', 'l22'], false, req, res, next);
+})
 
 var server = null;
+
+var map = new mapnik.Map(256, 256)
+var mapXml = fs.readFileSync('nwtopo.xml', 'utf8');
 
 function loadTree(searchRoot) {
   return new Promise(function (resolve, reject) {
@@ -98,7 +107,7 @@ loadTree(config.dataPath).then(function (lookup) {
   });
 });
 
-function getTile(layerName, polyTypes, doSave, req, res, next) {
+function getTile(layerName, polyTypes, asJson, req, res, next) {
   var reqX = req.params.col * 1;
   var reqY = req.params.row * 1;
   var reqZ = req.params.zoom * 1;
@@ -119,15 +128,16 @@ function getTile(layerName, polyTypes, doSave, req, res, next) {
   }
 
   var folder = __dirname + '/www/nwtopo/' + layerName;
-  if (!fs.existsSync(folder)) { fs.mkdir(folder) }
+  if (!fs.existsSync(folder)) { try { fs.mkdirSync(folder) } catch (e) { } }
   folder += '/' + reqZ;
-  if (!fs.existsSync(folder)) { fs.mkdir(folder) }
+  if (!fs.existsSync(folder)) { try { fs.mkdirSync(folder) } catch(e) { } }
   folder += '/' + reqX;
-  if (!fs.existsSync(folder)) { fs.mkdir(folder) }
+  if (!fs.existsSync(folder)) { try { fs.mkdirSync(folder) } catch(e) { } }
 
-  var file = folder + '/' + reqY + '.json'
+
+
+  var file = folder + '/' + reqY + (asJson ? '.json' : '.png')
   if (fs.existsSync(file) && fs.statSync(file).ctime > lookup.getLastModified()) {
-    //    console.log('found cached tile for ' + req.originalUrl);
     fs.readFile(file, function (err, data) {
       if (err) throw err;
       res.contentType('application/json');
@@ -136,16 +146,32 @@ function getTile(layerName, polyTypes, doSave, req, res, next) {
     return;
   }
 
-  // console.log('dynamically fetching ' + req.originalUrl);
   var divisions = lookup.divisionsInBounds(bounds, zoom);
 
   getShapes(divisions, bounds, polyTypes).then(function (shapes) {
     var result = JSON.stringify(shapes);
-    if (doSave) {
       console.log('saving ' + req.originalUrl + ' as ' + file);
-      fs.writeFileSync(file, result);
-    }
-    res.contentType('application/json');
-    res.send(result);
+      
+      if (asJson) {
+        fs.writeFileSync(file, result);
+        res.contentType('application/json');
+        res.send(result);
+      } else {
+        var tileXml = mapXml.replace("%%BOUNDS%%", bounds.west+','+bounds.south+','+bounds.east+','+bounds.north).replace("%%THEDATA%%", result);
+        var map = new mapnik.Map(256, 256)
+
+        map.fromString(tileXml, {}, function(err, map) {
+        map.zoomToBox(mercator.xyz_to_envelope(reqX, reqY, reqZ, false));
+        var im = new mapnik.Image(256, 256);
+        map.render(im, function(err, im) {
+          im.encode('png', function(err, buffer) {
+            fs.writeFile(file.replace('.json', '.png'), buffer, function(err) {
+               res.contentType('image/png');
+               res.send(fs.readFileSync(file))
+            })
+          })
+        })
+      })
+      }
   });
 };

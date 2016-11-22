@@ -13,6 +13,7 @@
   , mercator = require('./sphericalmercator.js')
 
 if (mapnik.register_default_input_plugins) mapnik.register_default_input_plugins();
+mapnik.register_system_fonts();
 
 Promise.promisifyAll(fs);
 

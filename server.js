@@ -91,6 +91,7 @@ function getShapes(resultSet, bounds, polyTypes) {
           resultSet[filePath].imgInfo.lblFile,
           fd
           ));
+        fs.closeSync(fd);
       })
       .finally(function () { callback() });
     }
@@ -102,7 +103,7 @@ function getShapes(resultSet, bounds, polyTypes) {
 }
 
 loadTree(config.dataPath).then(function (lookup) {
-  server = app.listen(3000, function () {
+  server = app.listen(process.env.PORT || 3000, function () {
     console.log('Started on port %d', server.address().port);
   });
 });
@@ -141,6 +142,7 @@ function getTile(layerName, polyTypes, asJson, req, res, next) {
     fs.readFile(file, function (err, data) {
       if (err) throw err;
       res.contentType('application/json');
+      res.setHeader("Access-Control-Allow-Origin", "*");
       res.send(data);
     });
     return;
@@ -155,6 +157,7 @@ function getTile(layerName, polyTypes, asJson, req, res, next) {
       if (asJson) {
         fs.writeFileSync(file, result);
         res.contentType('application/json');
+        res.setHeader("Access-Control-Allow-Origin", "*");
         res.send(result);
       } else {
         var tileXml = mapXml.replace("%%BOUNDS%%", bounds.west+','+bounds.south+','+bounds.east+','+bounds.north).replace("%%THEDATA%%", result);

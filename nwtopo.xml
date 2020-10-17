@@ -17,12 +17,12 @@
     <MaxScaleDenominator>25000</MaxScaleDenominator>
     <Filter>([type] = 19)</Filter>
     <TextSymbolizer face-name="Cambria Regular" placement="line" dy="12" max-char-angle-delta="18" ><![CDATA[[name]]]></TextSymbolizer>
-    <LineSymbolizer stroke="#00ff00" stroke-width="2" />
+    <LineSymbolizer stroke="#960037" stroke-width="2" />
   </Rule>
   <Rule>
     <MinScaleDenominator>25000</MinScaleDenominator>
     <Filter>([type] = 19)</Filter>
-    <LineSymbolizer stroke="#00ff00" stroke-width="2" />
+    <LineSymbolizer stroke="#960037" stroke-width="2" />
   </Rule>
   <Rule>
     <MaxScaleDenominator>25000</MaxScaleDenominator>
